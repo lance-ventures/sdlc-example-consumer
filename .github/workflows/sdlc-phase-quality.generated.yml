@@ -1,6 +1,6 @@
 # Generated from sdlc.yml by sdlc generate. DO NOT EDIT.
 # System lifecycle phase: quality@1
-# Source digest: sha256:0775962e45bf02382119b7a1bc11bc3941d85695dd530be5333843b281c0479b
+# Source digest: sha256:20b8d327e2a3c80e481f16b59b1a779f2d26fc880d54db60273379b82fe00b73
 name: SDLC / Quality
 on:
   repository_dispatch:
@@ -13,6 +13,7 @@ jobs:
   phase:
     runs-on: ubuntu-latest
     permissions:
+      packages: read
       contents: read
       issues: read
       pull-requests: read
@@ -21,22 +22,20 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}
-      - uses: pnpm/action-setup@v6
-        with:
-          version: 11.2.2
-          dest: ${{ runner.temp }}/setup-pnpm
       - uses: actions/setup-node@v7
         with:
           node-version: 24.11.0
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Run Quality
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: "@lance-ventures"
+      - run: npm ci --no-audit --no-fund
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: pnpm exec sdlc phase run quality --config sdlc.yml --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-quality-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}"
+          NODE_AUTH_TOKEN: ${{ github.token }}
+      - name: Run Quality
+        env: {}
+        run: npx --no-install sdlc phase run quality --config sdlc.yml --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-quality-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}"
       - name: Verify phase result
-        run: pnpm exec sdlc phase verify quality --config sdlc.yml --event "$GITHUB_EVENT_PATH" --result "${{ runner.temp }}/sdlc-quality-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}"
+        run: npx --no-install sdlc phase verify quality --config sdlc.yml --event "$GITHUB_EVENT_PATH" --result "${{ runner.temp }}/sdlc-quality-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}"
       - name: Upload phase evidence
         if: ${{ always() }}
         uses: actions/upload-artifact@v6
@@ -49,6 +48,7 @@ jobs:
       - phase
     runs-on: ubuntu-latest
     permissions:
+      packages: read
       contents: write
       actions: read
       checks: read
@@ -59,15 +59,15 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}
-      - uses: pnpm/action-setup@v6
-        with:
-          version: 11.2.2
-          dest: ${{ runner.temp }}/setup-pnpm
       - uses: actions/setup-node@v7
         with:
           node-version: 24.11.0
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: "@lance-ventures"
+      - run: npm ci --no-audit --no-fund
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
       - uses: actions/download-artifact@v7
         with:
           name: sdlc-quality-${{ github.run_id }}-${{ github.run_attempt }}
@@ -75,4 +75,4 @@ jobs:
       - name: Advance lifecycle
         env:
           GH_TOKEN: ${{ github.token }}
-        run: pnpm exec sdlc phase advance quality --config sdlc.yml --event "$GITHUB_EVENT_PATH" --result "${{ runner.temp }}/sdlc-quality-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}"
+        run: npx --no-install sdlc phase advance quality --config sdlc.yml --event "$GITHUB_EVENT_PATH" --result "${{ runner.temp }}/sdlc-quality-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}"

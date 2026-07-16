@@ -5,7 +5,8 @@ ci:
 
 lifecycle:
   profile: full
-  provider: codex
+  test-mode: true
+  provider: fixture
   phases:
     visual-design:
       checks:
@@ -42,5 +43,6 @@ lifecycle:
 
 defaults:
   runs-on: ubuntu-latest
+  package-manager: npm
 
 workflows: {}
