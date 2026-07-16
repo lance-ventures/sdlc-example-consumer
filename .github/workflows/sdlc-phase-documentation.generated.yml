@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   phase:
-    if: ${{ github.event_name == 'repository_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'repository_dispatch' || (github.event.workflow_run.conclusion == 'success' && startsWith(github.event.workflow_run.head_branch, 'sdlc/issue-')) }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
