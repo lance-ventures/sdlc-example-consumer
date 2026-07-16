@@ -17,3 +17,9 @@ npx sdlc conformance --all --source-sha HEAD
 The required conformance lane uses fixture provider results. The generated
 phase workflows use live providers only when their corresponding credentials
 are configured.
+
+Because the system repository and package are private, package conformance runs
+from the system repository: it checks out this repository at a pinned commit,
+installs a freshly packed artifact, and executes all 13 phases. This public
+repository's own CI verifies the consumer application contract and the absence
+of vendored system assets.
