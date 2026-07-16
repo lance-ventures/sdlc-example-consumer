@@ -32,7 +32,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
       - name: Run Testing
-        env: {}
         run: npx --no-install sdlc phase run testing --config sdlc.yml --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-testing-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}"
       - name: Verify phase result
         run: npx --no-install sdlc phase verify testing --config sdlc.yml --event "$GITHUB_EVENT_PATH" --result "${{ runner.temp }}/sdlc-testing-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}"
