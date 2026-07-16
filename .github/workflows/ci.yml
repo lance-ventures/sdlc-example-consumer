@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  packages: read
 
 jobs:
   consumer:
@@ -18,6 +19,12 @@ jobs:
         with:
           node-version: 24.11.0
           cache: npm
-      - run: npm ci
+          registry-url: https://npm.pkg.github.com
+          scope: "@lance-ventures"
+      - run: npm ci --no-audit --no-fund
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
       - run: npm run check
+      - run: npx --no-install sdlc generate --check
+      - run: npx --no-install sdlc conformance --all --source-sha "$GITHUB_SHA"
       - run: test ! -e .agents
