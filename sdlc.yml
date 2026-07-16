@@ -1,5 +1,8 @@
 version: 1
 
+ci:
+  workflow: .github/workflows/ci.yml
+
 lifecycle:
   profile: full
   provider: codex

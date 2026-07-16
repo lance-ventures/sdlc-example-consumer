@@ -1,6 +1,6 @@
 # Generated from sdlc.yml by sdlc generate. DO NOT EDIT.
 # System lifecycle phase: complete@1
-# Source digest: sha256:e8fa4833135b326f8c62c79da4d4c3de9e05dbdee681af7a488093052aff41e0
+# Source digest: sha256:0775962e45bf02382119b7a1bc11bc3941d85695dd530be5333843b281c0479b
 name: SDLC / Complete
 on:
   repository_dispatch:
@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          ref: ${{ github.event.client_payload.head_sha || github.sha }}
+          ref: ${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}
       - uses: pnpm/action-setup@v6
         with:
           version: 11.2.2
@@ -36,10 +36,11 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: pnpm exec sdlc phase run complete --config sdlc.yml --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-complete-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.sha }}"
+        run: pnpm exec sdlc phase run complete --config sdlc.yml --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-complete-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}"
       - name: Verify phase result
-        run: pnpm exec sdlc phase verify complete --config sdlc.yml --event "$GITHUB_EVENT_PATH" --result "${{ runner.temp }}/sdlc-complete-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.sha }}"
+        run: pnpm exec sdlc phase verify complete --config sdlc.yml --event "$GITHUB_EVENT_PATH" --result "${{ runner.temp }}/sdlc-complete-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}"
       - name: Upload phase evidence
+        if: ${{ always() }}
         uses: actions/upload-artifact@v6
         with:
           name: sdlc-complete-${{ github.run_id }}-${{ github.run_attempt }}
@@ -58,7 +59,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          ref: ${{ github.event.client_payload.head_sha || github.sha }}
+          ref: ${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}
       - uses: pnpm/action-setup@v6
         with:
           version: 11.2.2
@@ -75,4 +76,4 @@ jobs:
       - name: Advance lifecycle
         env:
           GH_TOKEN: ${{ github.token }}
-        run: pnpm exec sdlc phase advance complete --config sdlc.yml --event "$GITHUB_EVENT_PATH" --result "${{ runner.temp }}/sdlc-complete-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.sha }}"
+        run: pnpm exec sdlc phase advance complete --config sdlc.yml --event "$GITHUB_EVENT_PATH" --result "${{ runner.temp }}/sdlc-complete-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}"

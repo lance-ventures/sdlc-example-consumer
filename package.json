@@ -19,8 +19,5 @@
   "devDependencies": {
     "@types/node": "^24.0.0",
     "typescript": "6.0.3"
-  },
-  "dependencies": {
-    "@lance-ventures/sdlc": "file:../../../../../var/folders/bx/5fdvp5gj399042q66180m1x00000gn/T/tmp.s09uwKuPin/lance-ventures-sdlc-0.3.0.tgz"
   }
 }
