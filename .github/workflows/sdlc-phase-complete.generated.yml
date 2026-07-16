@@ -13,11 +13,9 @@ jobs:
   phase:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-      actions: write
-      checks: read
+      contents: read
+      issues: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@v7
         with:
@@ -52,9 +50,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      issues: write
-      pull-requests: write
       actions: read
+      issues: write
+      pull-requests: read
     steps:
       - uses: actions/checkout@v7
         with:
