@@ -1,0 +1,43 @@
+version: 1
+
+lifecycle:
+  profile: full
+  provider: codex
+  phases:
+    visual-design:
+      checks:
+        - name: visual-contract
+          run: [npm, run, visual]
+    implementation:
+      checks:
+        - name: implementation-tests
+          run: [npm, test]
+    documentation:
+      checks:
+        - name: documentation-contract
+          run: [npm, run, "docs:check"]
+    testing:
+      checks:
+        - name: test-suite
+          run: [npm, test]
+    quality:
+      checks:
+        - name: quality-gate
+          run: [npm, run, build]
+    deployment:
+      checks:
+        - name: preview-smoke
+          run: [npm, run, smoke]
+    operations:
+      checks:
+        - name: health-contract
+          run: [npm, run, smoke]
+    maintenance:
+      checks:
+        - name: maintenance-contract
+          run: [npm, run, maintenance]
+
+defaults:
+  runs-on: ubuntu-latest
+
+workflows: {}

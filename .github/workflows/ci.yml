@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      system-ref:
+        description: SDLC git ref to package and test
+        required: false
+        default: main
+
+permissions:
+  contents: read
+
+jobs:
+  consumer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+        with:
+          repository: lance-ventures/sdlc
+          ref: ${{ inputs.system-ref || 'main' }}
+          path: .system-source
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.2.2
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.11.0
+          cache: npm
+      - run: pnpm install --dir .system-source --frozen-lockfile
+      - run: pnpm --dir .system-source build
+      - run: npm pack --silent --pack-destination "$RUNNER_TEMP" ./.system-source
+      - run: npm install --no-audit --no-fund --package-lock=false "$RUNNER_TEMP"/lance-ventures-sdlc-*.tgz
+      - run: npm run check
+      - run: npx sdlc generate --check
+      - run: npx sdlc conformance --all --source-sha "$GITHUB_SHA"
+      - run: test ! -e .agents

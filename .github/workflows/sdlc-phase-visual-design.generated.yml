@@ -1,0 +1,76 @@
+# Generated from sdlc.yml by sdlc generate. DO NOT EDIT.
+# System lifecycle phase: visual-design@1
+# Source digest: sha256:e8fa4833135b326f8c62c79da4d4c3de9e05dbdee681af7a488093052aff41e0
+name: SDLC / Visual Design
+on:
+  repository_dispatch:
+    types:
+      - sdlc.phase.visual-design
+concurrency:
+  group: sdlc-visual-design-${{ github.event.issue.number || github.event.client_payload.issue }}
+  cancel-in-progress: false
+jobs:
+  phase:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.client_payload.head_sha || github.sha }}
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.2.2
+          dest: ${{ runner.temp }}/setup-pnpm
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.11.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Run Visual Design
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: pnpm exec sdlc phase run visual-design --config sdlc.yml --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-visual-design-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.sha }}"
+      - name: Verify phase result
+        run: pnpm exec sdlc phase verify visual-design --config sdlc.yml --event "$GITHUB_EVENT_PATH" --result "${{ runner.temp }}/sdlc-visual-design-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.sha }}"
+      - name: Upload phase evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: sdlc-visual-design-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/sdlc-visual-design-result.json
+          if-no-files-found: error
+  advance:
+    needs:
+      - phase
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.client_payload.head_sha || github.sha }}
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.2.2
+          dest: ${{ runner.temp }}/setup-pnpm
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.11.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@v7
+        with:
+          name: sdlc-visual-design-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}
+      - name: Advance lifecycle
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: pnpm exec sdlc phase advance visual-design --config sdlc.yml --event "$GITHUB_EVENT_PATH" --result "${{ runner.temp }}/sdlc-visual-design-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.sha }}"
