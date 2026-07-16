@@ -7,12 +7,14 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  packages: read
+  contents: none
 
 jobs:
   consumer:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -28,3 +30,26 @@ jobs:
       - run: npx --no-install sdlc generate --check
       - run: npx --no-install sdlc conformance --all --source-sha "$GITHUB_SHA"
       - run: test ! -e .agents
+
+  continue-lifecycle:
+    if: github.event_name == 'workflow_dispatch' && startsWith(github.ref_name, 'sdlc/issue-')
+    needs: [consumer]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.11.0
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: "@lance-ventures"
+      - run: npm ci --no-audit --no-fund
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+      - name: Continue lifecycle
+        run: npx --no-install sdlc phase resume-ci --event "$GITHUB_EVENT_PATH"
+        env:
+          GH_TOKEN: ${{ github.token }}

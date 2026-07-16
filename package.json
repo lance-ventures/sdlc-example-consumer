@@ -6,7 +6,7 @@
   "engines": {
     "node": "24.11.x"
   },
-  "sdlcSystemVersion": "0.3.0",
+  "sdlcSystemVersion": "0.3.2",
   "scripts": {
     "build": "tsc --noEmit",
     "test": "node --experimental-strip-types --test test/*.test.ts",
@@ -17,7 +17,7 @@
     "check": "npm run build && npm test && npm run visual && npm run docs:check && npm run smoke && npm run maintenance"
   },
   "devDependencies": {
-    "@lance-ventures/sdlc": "0.3.0",
+    "@lance-ventures/sdlc": "0.3.2",
     "@types/node": "^24.0.0",
     "typescript": "6.0.3"
   }
