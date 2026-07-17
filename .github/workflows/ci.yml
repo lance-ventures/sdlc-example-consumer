@@ -27,8 +27,8 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
       - run: npm run check
-      - run: npx --no-install sdlc generate --check
-      - run: npx --no-install sdlc conformance --all --source-sha "$GITHUB_SHA"
+      - run: ./node_modules/.bin/sdlc generate --check
+      - run: ./node_modules/.bin/sdlc conformance --all --source-sha "$GITHUB_SHA"
       - run: test ! -e .agents
 
   continue-lifecycle:
@@ -50,6 +50,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
       - name: Continue lifecycle
-        run: npx --no-install sdlc phase resume-ci --event "$GITHUB_EVENT_PATH"
+        run: ./node_modules/.bin/sdlc phase resume-ci --event "$GITHUB_EVENT_PATH"
         env:
           GH_TOKEN: ${{ github.token }}

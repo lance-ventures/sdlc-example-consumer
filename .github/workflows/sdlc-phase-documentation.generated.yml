@@ -38,9 +38,9 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
       - name: Run Documentation
-        run: npx --no-install sdlc phase run documentation --config sdlc.yml --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-documentation-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}"
+        run: ./node_modules/.bin/sdlc phase run documentation --config sdlc.yml --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-documentation-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}"
       - name: Verify phase result
-        run: npx --no-install sdlc phase verify documentation --config sdlc.yml --event "$GITHUB_EVENT_PATH" --result "${{ runner.temp }}/sdlc-documentation-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}"
+        run: ./node_modules/.bin/sdlc phase verify documentation --config sdlc.yml --event "$GITHUB_EVENT_PATH" --result "${{ runner.temp }}/sdlc-documentation-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}"
       - name: Upload phase evidence
         if: ${{ always() }}
         uses: actions/upload-artifact@v6
@@ -77,4 +77,4 @@ jobs:
       - name: Advance lifecycle
         env:
           GH_TOKEN: ${{ github.token }}
-        run: npx --no-install sdlc phase advance documentation --config sdlc.yml --event "$GITHUB_EVENT_PATH" --result "${{ runner.temp }}/sdlc-documentation-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}"
+        run: ./node_modules/.bin/sdlc phase advance documentation --config sdlc.yml --event "$GITHUB_EVENT_PATH" --result "${{ runner.temp }}/sdlc-documentation-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}"

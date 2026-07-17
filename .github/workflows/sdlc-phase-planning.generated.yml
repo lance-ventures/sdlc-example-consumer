@@ -32,9 +32,9 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
       - name: Run Planning
-        run: npx --no-install sdlc phase run planning --config sdlc.yml --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-planning-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}"
+        run: ./node_modules/.bin/sdlc phase run planning --config sdlc.yml --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-planning-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}"
       - name: Verify phase result
-        run: npx --no-install sdlc phase verify planning --config sdlc.yml --event "$GITHUB_EVENT_PATH" --result "${{ runner.temp }}/sdlc-planning-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}"
+        run: ./node_modules/.bin/sdlc phase verify planning --config sdlc.yml --event "$GITHUB_EVENT_PATH" --result "${{ runner.temp }}/sdlc-planning-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}"
       - name: Upload phase evidence
         if: ${{ always() }}
         uses: actions/upload-artifact@v6
@@ -71,4 +71,4 @@ jobs:
       - name: Advance lifecycle
         env:
           GH_TOKEN: ${{ github.token }}
-        run: npx --no-install sdlc phase advance planning --config sdlc.yml --event "$GITHUB_EVENT_PATH" --result "${{ runner.temp }}/sdlc-planning-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}"
+        run: ./node_modules/.bin/sdlc phase advance planning --config sdlc.yml --event "$GITHUB_EVENT_PATH" --result "${{ runner.temp }}/sdlc-planning-result.json" --source-sha "${{ github.event.client_payload.head_sha || github.event.workflow_run.head_sha || github.sha }}"
