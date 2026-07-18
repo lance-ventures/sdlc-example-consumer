@@ -1,48 +1,200 @@
-version: 1
+version: 2
 
-ci:
-  workflow: .github/workflows/ci.yml
-
-lifecycle:
-  profile: full
-  test-mode: true
-  provider: fixture
+definitions:
   phases:
-    visual-design:
-      checks:
-        - name: visual-contract
-          run: [npm, run, visual]
-    implementation:
-      checks:
-        - name: implementation-tests
-          run: [npm, test]
-    documentation:
-      checks:
-        - name: documentation-contract
-          run: [npm, run, "docs:check"]
-    testing:
-      checks:
-        - name: test-suite
-          run: [npm, test]
-    quality:
-      checks:
-        - name: quality-gate
-          run: [npm, run, build]
-    deployment:
-      checks:
-        - name: preview-smoke
-          run: [npm, run, smoke]
-    operations:
-      checks:
-        - name: health-contract
-          run: [npm, run, smoke]
-    maintenance:
-      checks:
-        - name: maintenance-contract
-          run: [npm, run, maintenance]
+    scout:
+      extends: plugin/feasibility@1
+    brief:
+      extends: plugin/requirements@1
+    map:
+      extends: plugin/planning@1
+    shape:
+      extends: plugin/design@1
+    look:
+      extends: plugin/visual-design@1
+    build:
+      extends: plugin/implementation@1
+    explain:
+      extends: plugin/documentation@1
+    prove:
+      extends: plugin/testing@1
+    judge:
+      extends: plugin/quality@1
+    ship:
+      extends: plugin/deployment@1
+    watch:
+      extends: plugin/operations@1
+    tend:
+      extends: plugin/maintenance@1
+    finish:
+      extends: plugin/complete@1
 
 defaults:
   runs-on: ubuntu-latest
   package-manager: npm
+  provider: fixture
+  test-mode: true
+  permissions:
+    contents: read
 
-workflows: {}
+workflows:
+  delivery:
+    name: Example delivery graph
+    on:
+      workflow_dispatch: {}
+    jobs:
+      scout:
+        name: Check viability
+        steps:
+          - id: assess
+            name: Assess the request
+            uses: sdlc.phase
+            with:
+              definition: scout
+          - id: compile
+            name: Compile the application
+            run: npm run build
+      brief:
+        name: Establish the contract
+        needs: scout
+        steps:
+          - id: define
+            name: Define expected behavior
+            uses: sdlc.phase
+            with:
+              definition: brief
+          - id: docs
+            name: Check consumer documentation
+            run: npm run docs:check
+      map:
+        name: Choose the route
+        needs: brief
+        steps:
+          - id: organize
+            name: Organize the work
+            uses: sdlc.phase
+            with:
+              definition: map
+          - id: compile
+            name: Compile the planned surface
+            run: npm run build
+      shape:
+        name: Define the structure
+        needs: map
+        steps:
+          - id: structure
+            name: Define the implementation structure
+            uses: sdlc.phase
+            with:
+              definition: shape
+          - id: compile
+            name: Compile the designed surface
+            run: npm run build
+      look:
+        name: Verify presentation
+        needs: shape
+        steps:
+          - id: present
+            name: Define the presentation contract
+            uses: sdlc.phase
+            with:
+              definition: look
+          - id: visual
+            name: Run the visual contract
+            run: npm run visual
+      build:
+        name: Construct the change
+        needs: [shape, look]
+        steps:
+          - id: construct
+            name: Construct the requested behavior
+            uses: sdlc.phase
+            with:
+              definition: build
+          - id: test
+            name: Test the constructed behavior
+            run: npm test
+      explain:
+        name: Explain the change
+        needs: build
+        steps:
+          - id: describe
+            name: Describe the resulting behavior
+            uses: sdlc.phase
+            with:
+              definition: explain
+          - id: docs
+            name: Verify the documentation contract
+            run: npm run docs:check
+      prove:
+        name: Prove the change
+        needs: build
+        steps:
+          - id: exercise
+            name: Exercise the resulting behavior
+            uses: sdlc.phase
+            with:
+              definition: prove
+          - id: test
+            name: Run the deterministic test suite
+            run: npm test
+      judge:
+        name: Apply the release gate
+        needs: [explain, prove]
+        steps:
+          - id: evaluate
+            name: Evaluate release readiness
+            uses: sdlc.phase
+            with:
+              definition: judge
+          - id: check
+            name: Run every consumer check
+            run: npm run check
+      ship:
+        name: Exercise delivery
+        needs: judge
+        steps:
+          - id: deliver
+            name: Validate delivery behavior
+            uses: sdlc.phase
+            with:
+              definition: ship
+          - id: smoke
+            name: Smoke test the preview
+            run: npm run smoke
+      watch:
+        name: Exercise operation
+        needs: ship
+        steps:
+          - id: observe
+            name: Validate operational behavior
+            uses: sdlc.phase
+            with:
+              definition: watch
+          - id: health
+            name: Check preview health
+            run: npm run smoke
+      tend:
+        name: Exercise maintenance
+        needs: watch
+        steps:
+          - id: maintain
+            name: Validate maintenance behavior
+            uses: sdlc.phase
+            with:
+              definition: tend
+          - id: boundary
+            name: Check the package boundary
+            run: npm run maintenance
+      finish:
+        name: Close the graph
+        needs: tend
+        steps:
+          - id: close
+            name: Validate completion behavior
+            uses: sdlc.phase
+            with:
+              definition: finish
+          - id: check
+            name: Run the final consumer proof
+            run: npm run check
