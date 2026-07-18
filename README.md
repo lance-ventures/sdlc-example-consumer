@@ -14,12 +14,14 @@ npx sdlc generate --check
 npx sdlc conformance --all --source-sha HEAD
 ```
 
-The required conformance lane uses fixture provider results. The generated
-phase workflows use live providers only when their corresponding credentials
-are configured.
+The configured `delivery` workflow is a consumer-owned graph. Its job and phase
+names are ordinary data, dependencies use native GitHub Actions `needs`, and
+each phase composes a packaged definition with a deterministic consumer check.
+The required conformance lane uses fixture provider results; consumers can opt
+individual definitions into live providers when their credentials are present.
 
 Because the system repository and package are private, package conformance runs
 from the system repository: it checks out this repository at a pinned commit,
-installs a freshly packed artifact, and executes all 13 phases. This public
+installs a freshly packed artifact, and executes all configured phases. This public
 repository's own CI verifies the consumer application contract and the absence
 of vendored system assets.

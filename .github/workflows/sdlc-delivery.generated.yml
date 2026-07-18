@@ -1,0 +1,518 @@
+# Generated from sdlc.yml by sdlc generate. DO NOT EDIT.
+# Source digest: sha256:32a9602d67f409157264aaf1180c30e172c7f3f7b0699dbbe83a1773c37e5415
+name: Example delivery graph
+on:
+  workflow_dispatch: {}
+jobs:
+  scout:
+    name: Check viability
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.11.0
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: "@lance-ventures"
+      - run: npm ci --no-audit --no-fund
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+      - id: assess
+        name: Assess the request
+        run: ./node_modules/.bin/sdlc execute --config sdlc.yml --workflow delivery --job scout --step assess --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-scout-assess.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: sdlc-result-${{ github.run_id }}-delivery-scout-assess
+          path: ${{ runner.temp }}/sdlc-result-delivery-scout-assess.json
+          if-no-files-found: error
+      - id: compile
+        name: Compile the application
+        run: npm run build
+  brief:
+    name: Establish the contract
+    needs:
+      - scout
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.11.0
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: "@lance-ventures"
+      - run: npm ci --no-audit --no-fund
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: sdlc-result-${{ github.run_id }}-delivery-scout-*
+          path: ${{ runner.temp }}/sdlc-inputs
+          merge-multiple: true
+      - id: define
+        name: Define expected behavior
+        run: ./node_modules/.bin/sdlc execute --config sdlc.yml --workflow delivery --job brief --step define --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-brief-define.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: sdlc-result-${{ github.run_id }}-delivery-brief-define
+          path: ${{ runner.temp }}/sdlc-result-delivery-brief-define.json
+          if-no-files-found: error
+      - id: docs
+        name: Check consumer documentation
+        run: npm run docs:check
+  map:
+    name: Choose the route
+    needs:
+      - brief
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.11.0
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: "@lance-ventures"
+      - run: npm ci --no-audit --no-fund
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: sdlc-result-${{ github.run_id }}-delivery-brief-*
+          path: ${{ runner.temp }}/sdlc-inputs
+          merge-multiple: true
+      - id: organize
+        name: Organize the work
+        run: ./node_modules/.bin/sdlc execute --config sdlc.yml --workflow delivery --job map --step organize --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-map-organize.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: sdlc-result-${{ github.run_id }}-delivery-map-organize
+          path: ${{ runner.temp }}/sdlc-result-delivery-map-organize.json
+          if-no-files-found: error
+      - id: compile
+        name: Compile the planned surface
+        run: npm run build
+  shape:
+    name: Define the structure
+    needs:
+      - map
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.11.0
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: "@lance-ventures"
+      - run: npm ci --no-audit --no-fund
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: sdlc-result-${{ github.run_id }}-delivery-map-*
+          path: ${{ runner.temp }}/sdlc-inputs
+          merge-multiple: true
+      - id: structure
+        name: Define the implementation structure
+        run: ./node_modules/.bin/sdlc execute --config sdlc.yml --workflow delivery --job shape --step structure --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-shape-structure.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: sdlc-result-${{ github.run_id }}-delivery-shape-structure
+          path: ${{ runner.temp }}/sdlc-result-delivery-shape-structure.json
+          if-no-files-found: error
+      - id: compile
+        name: Compile the designed surface
+        run: npm run build
+  look:
+    name: Verify presentation
+    needs:
+      - shape
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.11.0
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: "@lance-ventures"
+      - run: npm ci --no-audit --no-fund
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: sdlc-result-${{ github.run_id }}-delivery-shape-*
+          path: ${{ runner.temp }}/sdlc-inputs
+          merge-multiple: true
+      - id: present
+        name: Define the presentation contract
+        run: ./node_modules/.bin/sdlc execute --config sdlc.yml --workflow delivery --job look --step present --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-look-present.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: sdlc-result-${{ github.run_id }}-delivery-look-present
+          path: ${{ runner.temp }}/sdlc-result-delivery-look-present.json
+          if-no-files-found: error
+      - id: visual
+        name: Run the visual contract
+        run: npm run visual
+  build:
+    name: Construct the change
+    needs:
+      - shape
+      - look
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.11.0
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: "@lance-ventures"
+      - run: npm ci --no-audit --no-fund
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: sdlc-result-${{ github.run_id }}-delivery-shape-*
+          path: ${{ runner.temp }}/sdlc-inputs
+          merge-multiple: true
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: sdlc-result-${{ github.run_id }}-delivery-look-*
+          path: ${{ runner.temp }}/sdlc-inputs
+          merge-multiple: true
+      - id: construct
+        name: Construct the requested behavior
+        run: ./node_modules/.bin/sdlc execute --config sdlc.yml --workflow delivery --job build --step construct --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-build-construct.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: sdlc-result-${{ github.run_id }}-delivery-build-construct
+          path: ${{ runner.temp }}/sdlc-result-delivery-build-construct.json
+          if-no-files-found: error
+      - id: test
+        name: Test the constructed behavior
+        run: npm test
+  explain:
+    name: Explain the change
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.11.0
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: "@lance-ventures"
+      - run: npm ci --no-audit --no-fund
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: sdlc-result-${{ github.run_id }}-delivery-build-*
+          path: ${{ runner.temp }}/sdlc-inputs
+          merge-multiple: true
+      - id: describe
+        name: Describe the resulting behavior
+        run: ./node_modules/.bin/sdlc execute --config sdlc.yml --workflow delivery --job explain --step describe --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-explain-describe.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: sdlc-result-${{ github.run_id }}-delivery-explain-describe
+          path: ${{ runner.temp }}/sdlc-result-delivery-explain-describe.json
+          if-no-files-found: error
+      - id: docs
+        name: Verify the documentation contract
+        run: npm run docs:check
+  prove:
+    name: Prove the change
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.11.0
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: "@lance-ventures"
+      - run: npm ci --no-audit --no-fund
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: sdlc-result-${{ github.run_id }}-delivery-build-*
+          path: ${{ runner.temp }}/sdlc-inputs
+          merge-multiple: true
+      - id: exercise
+        name: Exercise the resulting behavior
+        run: ./node_modules/.bin/sdlc execute --config sdlc.yml --workflow delivery --job prove --step exercise --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-prove-exercise.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: sdlc-result-${{ github.run_id }}-delivery-prove-exercise
+          path: ${{ runner.temp }}/sdlc-result-delivery-prove-exercise.json
+          if-no-files-found: error
+      - id: test
+        name: Run the deterministic test suite
+        run: npm test
+  judge:
+    name: Apply the release gate
+    needs:
+      - explain
+      - prove
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.11.0
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: "@lance-ventures"
+      - run: npm ci --no-audit --no-fund
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: sdlc-result-${{ github.run_id }}-delivery-explain-*
+          path: ${{ runner.temp }}/sdlc-inputs
+          merge-multiple: true
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: sdlc-result-${{ github.run_id }}-delivery-prove-*
+          path: ${{ runner.temp }}/sdlc-inputs
+          merge-multiple: true
+      - id: evaluate
+        name: Evaluate release readiness
+        run: ./node_modules/.bin/sdlc execute --config sdlc.yml --workflow delivery --job judge --step evaluate --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-judge-evaluate.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: sdlc-result-${{ github.run_id }}-delivery-judge-evaluate
+          path: ${{ runner.temp }}/sdlc-result-delivery-judge-evaluate.json
+          if-no-files-found: error
+      - id: check
+        name: Run every consumer check
+        run: npm run check
+  ship:
+    name: Exercise delivery
+    needs:
+      - judge
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.11.0
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: "@lance-ventures"
+      - run: npm ci --no-audit --no-fund
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: sdlc-result-${{ github.run_id }}-delivery-judge-*
+          path: ${{ runner.temp }}/sdlc-inputs
+          merge-multiple: true
+      - id: deliver
+        name: Validate delivery behavior
+        run: ./node_modules/.bin/sdlc execute --config sdlc.yml --workflow delivery --job ship --step deliver --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-ship-deliver.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: sdlc-result-${{ github.run_id }}-delivery-ship-deliver
+          path: ${{ runner.temp }}/sdlc-result-delivery-ship-deliver.json
+          if-no-files-found: error
+      - id: smoke
+        name: Smoke test the preview
+        run: npm run smoke
+  watch:
+    name: Exercise operation
+    needs:
+      - ship
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.11.0
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: "@lance-ventures"
+      - run: npm ci --no-audit --no-fund
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: sdlc-result-${{ github.run_id }}-delivery-ship-*
+          path: ${{ runner.temp }}/sdlc-inputs
+          merge-multiple: true
+      - id: observe
+        name: Validate operational behavior
+        run: ./node_modules/.bin/sdlc execute --config sdlc.yml --workflow delivery --job watch --step observe --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-watch-observe.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: sdlc-result-${{ github.run_id }}-delivery-watch-observe
+          path: ${{ runner.temp }}/sdlc-result-delivery-watch-observe.json
+          if-no-files-found: error
+      - id: health
+        name: Check preview health
+        run: npm run smoke
+  tend:
+    name: Exercise maintenance
+    needs:
+      - watch
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.11.0
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: "@lance-ventures"
+      - run: npm ci --no-audit --no-fund
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: sdlc-result-${{ github.run_id }}-delivery-watch-*
+          path: ${{ runner.temp }}/sdlc-inputs
+          merge-multiple: true
+      - id: maintain
+        name: Validate maintenance behavior
+        run: ./node_modules/.bin/sdlc execute --config sdlc.yml --workflow delivery --job tend --step maintain --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-tend-maintain.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: sdlc-result-${{ github.run_id }}-delivery-tend-maintain
+          path: ${{ runner.temp }}/sdlc-result-delivery-tend-maintain.json
+          if-no-files-found: error
+      - id: boundary
+        name: Check the package boundary
+        run: npm run maintenance
+  finish:
+    name: Close the graph
+    needs:
+      - tend
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.11.0
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: "@lance-ventures"
+      - run: npm ci --no-audit --no-fund
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: sdlc-result-${{ github.run_id }}-delivery-tend-*
+          path: ${{ runner.temp }}/sdlc-inputs
+          merge-multiple: true
+      - id: close
+        name: Validate completion behavior
+        run: ./node_modules/.bin/sdlc execute --config sdlc.yml --workflow delivery --job finish --step close --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-finish-close.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: sdlc-result-${{ github.run_id }}-delivery-finish-close
+          path: ${{ runner.temp }}/sdlc-result-delivery-finish-close.json
+          if-no-files-found: error
+      - id: check
+        name: Run the final consumer proof
+        run: npm run check
