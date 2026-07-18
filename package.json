@@ -17,7 +17,7 @@
     "check": "npm run build && npm test && npm run visual && npm run docs:check && npm run smoke && npm run maintenance"
   },
   "devDependencies": {
-    "@lance-ventures/sdlc": "2.0.2",
+    "@lance-ventures/sdlc": "2.0.3",
     "@types/node": "^24.0.0",
     "typescript": "6.0.3"
   }
