@@ -28,7 +28,7 @@ jobs:
         name: Assess the request
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job scout --step assess --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-scout-assess.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job scout --step assess --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-scout-assess.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - if: ${{ always() }}
         uses: actions/upload-artifact@v6
         with:
@@ -69,7 +69,7 @@ jobs:
         name: Define expected behavior
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job brief --step define --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-brief-define.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job brief --step define --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-brief-define.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - if: ${{ always() }}
         uses: actions/upload-artifact@v6
         with:
@@ -110,7 +110,7 @@ jobs:
         name: Organize the work
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job map --step organize --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-map-organize.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job map --step organize --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-map-organize.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - if: ${{ always() }}
         uses: actions/upload-artifact@v6
         with:
@@ -151,7 +151,7 @@ jobs:
         name: Define the implementation structure
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job shape --step structure --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-shape-structure.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job shape --step structure --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-shape-structure.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - if: ${{ always() }}
         uses: actions/upload-artifact@v6
         with:
@@ -192,7 +192,7 @@ jobs:
         name: Define the presentation contract
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job look --step present --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-look-present.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job look --step present --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-look-present.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - if: ${{ always() }}
         uses: actions/upload-artifact@v6
         with:
@@ -239,7 +239,7 @@ jobs:
         name: Construct the requested behavior
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job build --step construct --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-build-construct.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job build --step construct --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-build-construct.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - if: ${{ always() }}
         uses: actions/upload-artifact@v6
         with:
@@ -280,7 +280,7 @@ jobs:
         name: Describe the resulting behavior
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job explain --step describe --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-explain-describe.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job explain --step describe --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-explain-describe.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - if: ${{ always() }}
         uses: actions/upload-artifact@v6
         with:
@@ -321,7 +321,7 @@ jobs:
         name: Exercise the resulting behavior
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job prove --step exercise --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-prove-exercise.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job prove --step exercise --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-prove-exercise.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - if: ${{ always() }}
         uses: actions/upload-artifact@v6
         with:
@@ -368,7 +368,7 @@ jobs:
         name: Evaluate release readiness
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job judge --step evaluate --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-judge-evaluate.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job judge --step evaluate --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-judge-evaluate.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - if: ${{ always() }}
         uses: actions/upload-artifact@v6
         with:
@@ -409,7 +409,7 @@ jobs:
         name: Validate delivery behavior
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job ship --step deliver --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-ship-deliver.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job ship --step deliver --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-ship-deliver.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - if: ${{ always() }}
         uses: actions/upload-artifact@v6
         with:
@@ -450,7 +450,7 @@ jobs:
         name: Validate operational behavior
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job watch --step observe --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-watch-observe.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job watch --step observe --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-watch-observe.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - if: ${{ always() }}
         uses: actions/upload-artifact@v6
         with:
@@ -491,7 +491,7 @@ jobs:
         name: Validate maintenance behavior
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job tend --step maintain --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-tend-maintain.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job tend --step maintain --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-tend-maintain.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - if: ${{ always() }}
         uses: actions/upload-artifact@v6
         with:
@@ -532,7 +532,7 @@ jobs:
         name: Validate completion behavior
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job finish --step close --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-finish-close.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job finish --step close --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-finish-close.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - if: ${{ always() }}
         uses: actions/upload-artifact@v6
         with:
