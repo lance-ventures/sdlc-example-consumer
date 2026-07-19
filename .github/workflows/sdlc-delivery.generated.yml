@@ -6,6 +6,8 @@ on:
 jobs:
   scout:
     name: Check viability
+    outputs:
+      sdlc_result: ${{ steps['assess'].outputs.result }}
     runs-on: ubuntu-latest
     permissions:
       packages: read
@@ -28,13 +30,7 @@ jobs:
         name: Assess the request
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job scout --step assess --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-scout-assess.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
-      - if: ${{ always() }}
-        uses: actions/upload-artifact@v6
-        with:
-          name: sdlc-result-${{ github.run_id }}-delivery-scout-assess
-          path: ${{ runner.temp }}/sdlc-result-delivery-scout-assess.json
-          if-no-files-found: error
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job scout --step assess --event "$GITHUB_EVENT_PATH" --github-output "$GITHUB_OUTPUT" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - id: compile
         name: Compile the application
         run: npm run build
@@ -42,6 +38,8 @@ jobs:
     name: Establish the contract
     needs:
       - scout
+    outputs:
+      sdlc_result: ${{ steps['define'].outputs.result }}
     runs-on: ubuntu-latest
     permissions:
       packages: read
@@ -60,22 +58,12 @@ jobs:
       - run: npm ci --no-audit --no-fund
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
-      - uses: actions/download-artifact@v7
-        with:
-          pattern: sdlc-result-${{ github.run_id }}-delivery-scout-*
-          path: ${{ runner.temp }}/sdlc-inputs
-          merge-multiple: true
       - id: define
         name: Define expected behavior
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job brief --step define --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-brief-define.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
-      - if: ${{ always() }}
-        uses: actions/upload-artifact@v6
-        with:
-          name: sdlc-result-${{ github.run_id }}-delivery-brief-define
-          path: ${{ runner.temp }}/sdlc-result-delivery-brief-define.json
-          if-no-files-found: error
+          SDLC_UPSTREAM_RESULT_0: ${{ needs['scout'].outputs.sdlc_result }}
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job brief --step define --event "$GITHUB_EVENT_PATH" --github-output "$GITHUB_OUTPUT" --upstream-result "scout=$SDLC_UPSTREAM_RESULT_0" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - id: docs
         name: Check consumer documentation
         run: npm run docs:check
@@ -83,6 +71,8 @@ jobs:
     name: Choose the route
     needs:
       - brief
+    outputs:
+      sdlc_result: ${{ steps['organize'].outputs.result }}
     runs-on: ubuntu-latest
     permissions:
       packages: read
@@ -101,22 +91,12 @@ jobs:
       - run: npm ci --no-audit --no-fund
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
-      - uses: actions/download-artifact@v7
-        with:
-          pattern: sdlc-result-${{ github.run_id }}-delivery-brief-*
-          path: ${{ runner.temp }}/sdlc-inputs
-          merge-multiple: true
       - id: organize
         name: Organize the work
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job map --step organize --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-map-organize.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
-      - if: ${{ always() }}
-        uses: actions/upload-artifact@v6
-        with:
-          name: sdlc-result-${{ github.run_id }}-delivery-map-organize
-          path: ${{ runner.temp }}/sdlc-result-delivery-map-organize.json
-          if-no-files-found: error
+          SDLC_UPSTREAM_RESULT_0: ${{ needs['brief'].outputs.sdlc_result }}
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job map --step organize --event "$GITHUB_EVENT_PATH" --github-output "$GITHUB_OUTPUT" --upstream-result "brief=$SDLC_UPSTREAM_RESULT_0" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - id: compile
         name: Compile the planned surface
         run: npm run build
@@ -124,6 +104,8 @@ jobs:
     name: Define the structure
     needs:
       - map
+    outputs:
+      sdlc_result: ${{ steps['structure'].outputs.result }}
     runs-on: ubuntu-latest
     permissions:
       packages: read
@@ -142,22 +124,12 @@ jobs:
       - run: npm ci --no-audit --no-fund
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
-      - uses: actions/download-artifact@v7
-        with:
-          pattern: sdlc-result-${{ github.run_id }}-delivery-map-*
-          path: ${{ runner.temp }}/sdlc-inputs
-          merge-multiple: true
       - id: structure
         name: Define the implementation structure
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job shape --step structure --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-shape-structure.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
-      - if: ${{ always() }}
-        uses: actions/upload-artifact@v6
-        with:
-          name: sdlc-result-${{ github.run_id }}-delivery-shape-structure
-          path: ${{ runner.temp }}/sdlc-result-delivery-shape-structure.json
-          if-no-files-found: error
+          SDLC_UPSTREAM_RESULT_0: ${{ needs['map'].outputs.sdlc_result }}
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job shape --step structure --event "$GITHUB_EVENT_PATH" --github-output "$GITHUB_OUTPUT" --upstream-result "map=$SDLC_UPSTREAM_RESULT_0" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - id: compile
         name: Compile the designed surface
         run: npm run build
@@ -165,6 +137,8 @@ jobs:
     name: Verify presentation
     needs:
       - shape
+    outputs:
+      sdlc_result: ${{ steps['present'].outputs.result }}
     runs-on: ubuntu-latest
     permissions:
       packages: read
@@ -183,22 +157,12 @@ jobs:
       - run: npm ci --no-audit --no-fund
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
-      - uses: actions/download-artifact@v7
-        with:
-          pattern: sdlc-result-${{ github.run_id }}-delivery-shape-*
-          path: ${{ runner.temp }}/sdlc-inputs
-          merge-multiple: true
       - id: present
         name: Define the presentation contract
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job look --step present --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-look-present.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
-      - if: ${{ always() }}
-        uses: actions/upload-artifact@v6
-        with:
-          name: sdlc-result-${{ github.run_id }}-delivery-look-present
-          path: ${{ runner.temp }}/sdlc-result-delivery-look-present.json
-          if-no-files-found: error
+          SDLC_UPSTREAM_RESULT_0: ${{ needs['shape'].outputs.sdlc_result }}
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job look --step present --event "$GITHUB_EVENT_PATH" --github-output "$GITHUB_OUTPUT" --upstream-result "shape=$SDLC_UPSTREAM_RESULT_0" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - id: visual
         name: Run the visual contract
         run: npm run visual
@@ -207,6 +171,8 @@ jobs:
     needs:
       - shape
       - look
+    outputs:
+      sdlc_result: ${{ steps['construct'].outputs.result }}
     runs-on: ubuntu-latest
     permissions:
       packages: read
@@ -225,27 +191,13 @@ jobs:
       - run: npm ci --no-audit --no-fund
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
-      - uses: actions/download-artifact@v7
-        with:
-          pattern: sdlc-result-${{ github.run_id }}-delivery-shape-*
-          path: ${{ runner.temp }}/sdlc-inputs
-          merge-multiple: true
-      - uses: actions/download-artifact@v7
-        with:
-          pattern: sdlc-result-${{ github.run_id }}-delivery-look-*
-          path: ${{ runner.temp }}/sdlc-inputs
-          merge-multiple: true
       - id: construct
         name: Construct the requested behavior
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job build --step construct --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-build-construct.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
-      - if: ${{ always() }}
-        uses: actions/upload-artifact@v6
-        with:
-          name: sdlc-result-${{ github.run_id }}-delivery-build-construct
-          path: ${{ runner.temp }}/sdlc-result-delivery-build-construct.json
-          if-no-files-found: error
+          SDLC_UPSTREAM_RESULT_0: ${{ needs['shape'].outputs.sdlc_result }}
+          SDLC_UPSTREAM_RESULT_1: ${{ needs['look'].outputs.sdlc_result }}
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job build --step construct --event "$GITHUB_EVENT_PATH" --github-output "$GITHUB_OUTPUT" --upstream-result "shape=$SDLC_UPSTREAM_RESULT_0" --upstream-result "look=$SDLC_UPSTREAM_RESULT_1" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - id: test
         name: Test the constructed behavior
         run: npm test
@@ -253,6 +205,8 @@ jobs:
     name: Explain the change
     needs:
       - build
+    outputs:
+      sdlc_result: ${{ steps['describe'].outputs.result }}
     runs-on: ubuntu-latest
     permissions:
       packages: read
@@ -271,22 +225,12 @@ jobs:
       - run: npm ci --no-audit --no-fund
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
-      - uses: actions/download-artifact@v7
-        with:
-          pattern: sdlc-result-${{ github.run_id }}-delivery-build-*
-          path: ${{ runner.temp }}/sdlc-inputs
-          merge-multiple: true
       - id: describe
         name: Describe the resulting behavior
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job explain --step describe --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-explain-describe.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
-      - if: ${{ always() }}
-        uses: actions/upload-artifact@v6
-        with:
-          name: sdlc-result-${{ github.run_id }}-delivery-explain-describe
-          path: ${{ runner.temp }}/sdlc-result-delivery-explain-describe.json
-          if-no-files-found: error
+          SDLC_UPSTREAM_RESULT_0: ${{ needs['build'].outputs.sdlc_result }}
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job explain --step describe --event "$GITHUB_EVENT_PATH" --github-output "$GITHUB_OUTPUT" --upstream-result "build=$SDLC_UPSTREAM_RESULT_0" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - id: docs
         name: Verify the documentation contract
         run: npm run docs:check
@@ -294,6 +238,8 @@ jobs:
     name: Prove the change
     needs:
       - build
+    outputs:
+      sdlc_result: ${{ steps['exercise'].outputs.result }}
     runs-on: ubuntu-latest
     permissions:
       packages: read
@@ -312,22 +258,12 @@ jobs:
       - run: npm ci --no-audit --no-fund
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
-      - uses: actions/download-artifact@v7
-        with:
-          pattern: sdlc-result-${{ github.run_id }}-delivery-build-*
-          path: ${{ runner.temp }}/sdlc-inputs
-          merge-multiple: true
       - id: exercise
         name: Exercise the resulting behavior
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job prove --step exercise --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-prove-exercise.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
-      - if: ${{ always() }}
-        uses: actions/upload-artifact@v6
-        with:
-          name: sdlc-result-${{ github.run_id }}-delivery-prove-exercise
-          path: ${{ runner.temp }}/sdlc-result-delivery-prove-exercise.json
-          if-no-files-found: error
+          SDLC_UPSTREAM_RESULT_0: ${{ needs['build'].outputs.sdlc_result }}
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job prove --step exercise --event "$GITHUB_EVENT_PATH" --github-output "$GITHUB_OUTPUT" --upstream-result "build=$SDLC_UPSTREAM_RESULT_0" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - id: test
         name: Run the deterministic test suite
         run: npm test
@@ -336,6 +272,8 @@ jobs:
     needs:
       - explain
       - prove
+    outputs:
+      sdlc_result: ${{ steps['evaluate'].outputs.result }}
     runs-on: ubuntu-latest
     permissions:
       packages: read
@@ -354,27 +292,13 @@ jobs:
       - run: npm ci --no-audit --no-fund
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
-      - uses: actions/download-artifact@v7
-        with:
-          pattern: sdlc-result-${{ github.run_id }}-delivery-explain-*
-          path: ${{ runner.temp }}/sdlc-inputs
-          merge-multiple: true
-      - uses: actions/download-artifact@v7
-        with:
-          pattern: sdlc-result-${{ github.run_id }}-delivery-prove-*
-          path: ${{ runner.temp }}/sdlc-inputs
-          merge-multiple: true
       - id: evaluate
         name: Evaluate release readiness
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job judge --step evaluate --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-judge-evaluate.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
-      - if: ${{ always() }}
-        uses: actions/upload-artifact@v6
-        with:
-          name: sdlc-result-${{ github.run_id }}-delivery-judge-evaluate
-          path: ${{ runner.temp }}/sdlc-result-delivery-judge-evaluate.json
-          if-no-files-found: error
+          SDLC_UPSTREAM_RESULT_0: ${{ needs['explain'].outputs.sdlc_result }}
+          SDLC_UPSTREAM_RESULT_1: ${{ needs['prove'].outputs.sdlc_result }}
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job judge --step evaluate --event "$GITHUB_EVENT_PATH" --github-output "$GITHUB_OUTPUT" --upstream-result "explain=$SDLC_UPSTREAM_RESULT_0" --upstream-result "prove=$SDLC_UPSTREAM_RESULT_1" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - id: check
         name: Run every consumer check
         run: npm run check
@@ -382,6 +306,8 @@ jobs:
     name: Exercise delivery
     needs:
       - judge
+    outputs:
+      sdlc_result: ${{ steps['deliver'].outputs.result }}
     runs-on: ubuntu-latest
     permissions:
       packages: read
@@ -400,22 +326,12 @@ jobs:
       - run: npm ci --no-audit --no-fund
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
-      - uses: actions/download-artifact@v7
-        with:
-          pattern: sdlc-result-${{ github.run_id }}-delivery-judge-*
-          path: ${{ runner.temp }}/sdlc-inputs
-          merge-multiple: true
       - id: deliver
         name: Validate delivery behavior
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job ship --step deliver --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-ship-deliver.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
-      - if: ${{ always() }}
-        uses: actions/upload-artifact@v6
-        with:
-          name: sdlc-result-${{ github.run_id }}-delivery-ship-deliver
-          path: ${{ runner.temp }}/sdlc-result-delivery-ship-deliver.json
-          if-no-files-found: error
+          SDLC_UPSTREAM_RESULT_0: ${{ needs['judge'].outputs.sdlc_result }}
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job ship --step deliver --event "$GITHUB_EVENT_PATH" --github-output "$GITHUB_OUTPUT" --upstream-result "judge=$SDLC_UPSTREAM_RESULT_0" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - id: smoke
         name: Smoke test the preview
         run: npm run smoke
@@ -423,6 +339,8 @@ jobs:
     name: Exercise operation
     needs:
       - ship
+    outputs:
+      sdlc_result: ${{ steps['observe'].outputs.result }}
     runs-on: ubuntu-latest
     permissions:
       packages: read
@@ -441,22 +359,12 @@ jobs:
       - run: npm ci --no-audit --no-fund
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
-      - uses: actions/download-artifact@v7
-        with:
-          pattern: sdlc-result-${{ github.run_id }}-delivery-ship-*
-          path: ${{ runner.temp }}/sdlc-inputs
-          merge-multiple: true
       - id: observe
         name: Validate operational behavior
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job watch --step observe --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-watch-observe.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
-      - if: ${{ always() }}
-        uses: actions/upload-artifact@v6
-        with:
-          name: sdlc-result-${{ github.run_id }}-delivery-watch-observe
-          path: ${{ runner.temp }}/sdlc-result-delivery-watch-observe.json
-          if-no-files-found: error
+          SDLC_UPSTREAM_RESULT_0: ${{ needs['ship'].outputs.sdlc_result }}
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job watch --step observe --event "$GITHUB_EVENT_PATH" --github-output "$GITHUB_OUTPUT" --upstream-result "ship=$SDLC_UPSTREAM_RESULT_0" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - id: health
         name: Check preview health
         run: npm run smoke
@@ -464,6 +372,8 @@ jobs:
     name: Exercise maintenance
     needs:
       - watch
+    outputs:
+      sdlc_result: ${{ steps['maintain'].outputs.result }}
     runs-on: ubuntu-latest
     permissions:
       packages: read
@@ -482,22 +392,12 @@ jobs:
       - run: npm ci --no-audit --no-fund
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
-      - uses: actions/download-artifact@v7
-        with:
-          pattern: sdlc-result-${{ github.run_id }}-delivery-watch-*
-          path: ${{ runner.temp }}/sdlc-inputs
-          merge-multiple: true
       - id: maintain
         name: Validate maintenance behavior
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job tend --step maintain --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-tend-maintain.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
-      - if: ${{ always() }}
-        uses: actions/upload-artifact@v6
-        with:
-          name: sdlc-result-${{ github.run_id }}-delivery-tend-maintain
-          path: ${{ runner.temp }}/sdlc-result-delivery-tend-maintain.json
-          if-no-files-found: error
+          SDLC_UPSTREAM_RESULT_0: ${{ needs['watch'].outputs.sdlc_result }}
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job tend --step maintain --event "$GITHUB_EVENT_PATH" --github-output "$GITHUB_OUTPUT" --upstream-result "watch=$SDLC_UPSTREAM_RESULT_0" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - id: boundary
         name: Check the package boundary
         run: npm run maintenance
@@ -505,6 +405,8 @@ jobs:
     name: Close the graph
     needs:
       - tend
+    outputs:
+      sdlc_result: ${{ steps['close'].outputs.result }}
     runs-on: ubuntu-latest
     permissions:
       packages: read
@@ -523,22 +425,12 @@ jobs:
       - run: npm ci --no-audit --no-fund
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
-      - uses: actions/download-artifact@v7
-        with:
-          pattern: sdlc-result-${{ github.run_id }}-delivery-tend-*
-          path: ${{ runner.temp }}/sdlc-inputs
-          merge-multiple: true
       - id: close
         name: Validate completion behavior
         env:
           SDLC_RELEASE_TOKEN: ${{ github.token }}
-        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job finish --step close --event "$GITHUB_EVENT_PATH" --output "${{ runner.temp }}/sdlc-result-delivery-finish-close.json" --inputs "${{ runner.temp }}/sdlc-inputs" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
-      - if: ${{ always() }}
-        uses: actions/upload-artifact@v6
-        with:
-          name: sdlc-result-${{ github.run_id }}-delivery-finish-close
-          path: ${{ runner.temp }}/sdlc-result-delivery-finish-close.json
-          if-no-files-found: error
+          SDLC_UPSTREAM_RESULT_0: ${{ needs['tend'].outputs.sdlc_result }}
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow delivery --job finish --step close --event "$GITHUB_EVENT_PATH" --github-output "$GITHUB_OUTPUT" --upstream-result "tend=$SDLC_UPSTREAM_RESULT_0" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
       - id: check
         name: Run the final consumer proof
         run: npm run check
