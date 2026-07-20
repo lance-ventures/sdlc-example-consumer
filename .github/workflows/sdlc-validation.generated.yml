@@ -1,0 +1,90 @@
+# Generated from sdlc.yml by sdlc generate. DO NOT EDIT.
+# Source digest: sha256:676bbc589e54d67a22917f058494b82d81b9cadb9d6dfa95fbab783236c40203
+name: Validate a lifecycle canary
+on:
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: Lifecycle issue
+        required: true
+        type: string
+      pull_request:
+        description: Lifecycle pull request
+        required: true
+        type: string
+      branch:
+        description: Lifecycle head branch
+        required: true
+        type: string
+      head_sha:
+        description: Lifecycle head SHA
+        required: true
+        type: string
+      base_sha:
+        description: Lifecycle base SHA
+        required: true
+        type: string
+concurrency:
+  group: consumer-validation-${{ github.event.inputs.branch }}
+  cancel-in-progress: false
+jobs:
+  check:
+    name: Check the exact canary head
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.inputs.head_sha || github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.11.0
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: "@lance-ventures"
+      - run: npm ci --no-audit --no-fund
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+      - id: check
+        name: Run every consumer check
+        run: npm run check
+  accept:
+    name: Accept the exact canary head
+    needs:
+      - check
+    if: always() && needs.check.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.inputs.head_sha || github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.11.0
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: "@lance-ventures"
+      - run: npm ci --no-audit --no-fund
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+      - id: merge
+        name: Merge the exact tested head
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow validation --job accept --step merge --event "$GITHUB_EVENT_PATH" --github-output "$GITHUB_OUTPUT" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+      - id: complete
+        name: Complete the canary issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow validation --job accept --step complete --event "$GITHUB_EVENT_PATH" --github-output "$GITHUB_OUTPUT" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"

@@ -1,5 +1,5 @@
 # Generated from sdlc.yml by sdlc generate. DO NOT EDIT.
-# Source digest: sha256:32a9602d67f409157264aaf1180c30e172c7f3f7b0699dbbe83a1773c37e5415
+# Source digest: sha256:676bbc589e54d67a22917f058494b82d81b9cadb9d6dfa95fbab783236c40203
 name: Example delivery graph
 on:
   workflow_dispatch: {}
