@@ -1,0 +1,66 @@
+# Generated from sdlc.yml by sdlc generate. DO NOT EDIT.
+# Source digest: sha256:676bbc589e54d67a22917f058494b82d81b9cadb9d6dfa95fbab783236c40203
+name: Construct a lifecycle canary
+on:
+  issues:
+    types:
+      - labeled
+concurrency:
+  group: consumer-canary-${{ github.event.issue.number }}
+  cancel-in-progress: false
+jobs:
+  construct:
+    name: Construct the canary change
+    if: github.event.label.name == 'sdlc'
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+      contents: write
+      actions: write
+      issues: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.inputs.head_sha || github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.11.0
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: "@lance-ventures"
+      - run: npm ci --no-audit --no-fund
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+      - id: ready
+        name: Require a ready issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow request --job construct --step ready --event "$GITHUB_EVENT_PATH" --github-output "$GITHUB_OUTPUT" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+      - id: prepare
+        name: Prepare the issue branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow request --job construct --step prepare --event "$GITHUB_EVENT_PATH" --github-output "$GITHUB_OUTPUT" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+      - id: mutate
+        name: Record the canary request
+        if: steps.prepare.outputs.state != 'published'
+        run: node scripts/write-lifecycle-canary.mjs
+      - id: publish
+        name: Publish the canary change
+        if: steps.prepare.outputs.state != 'published'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow request --job construct --step publish --event "$GITHUB_EVENT_PATH" --github-output "$GITHUB_OUTPUT" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+      - id: pull-request
+        name: Ensure the canary pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow request --job construct --step pull-request --event "$GITHUB_EVENT_PATH" --github-output "$GITHUB_OUTPUT" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
+      - id: validate
+        name: Dispatch exact-head validation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: npm exec --offline -- sdlc execute --config sdlc.yml --workflow request --job construct --step validate --event "$GITHUB_EVENT_PATH" --github-output "$GITHUB_OUTPUT" --source-sha "${{ github.event.inputs.head_sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}"
