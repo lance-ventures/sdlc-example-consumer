@@ -15,6 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.inputs.head_sha || github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@v7
@@ -47,6 +48,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.inputs.head_sha || github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@v7
@@ -80,6 +82,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.inputs.head_sha || github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@v7
@@ -113,6 +116,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.inputs.head_sha || github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@v7
@@ -146,6 +150,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.inputs.head_sha || github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@v7
@@ -180,6 +185,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.inputs.head_sha || github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@v7
@@ -214,6 +220,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.inputs.head_sha || github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@v7
@@ -247,6 +254,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.inputs.head_sha || github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@v7
@@ -281,6 +289,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.inputs.head_sha || github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@v7
@@ -315,6 +324,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.inputs.head_sha || github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@v7
@@ -348,6 +358,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.inputs.head_sha || github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@v7
@@ -381,6 +392,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.inputs.head_sha || github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@v7
@@ -414,6 +426,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.inputs.head_sha || github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.event.client_payload.head_sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@v7
